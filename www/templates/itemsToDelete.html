@@ -1,0 +1,18 @@
+<ion-modal-view>
+    
+    <ion-header-bar>
+        <h1 class="title">{{itemsToDelete[0].product.name}}</h1>
+        <div class="buttons">
+            <button class="button button-clear" ng-click="modalItemDeleteClose()">Anuluj</button>
+        </div>
+    </ion-header-bar>
+    
+    <ion-content>
+        <ion-list>
+            <ion-item ng-click="itemDelete(item)" ng-repeat="item in itemsToDelete">
+                {{item.expiration_date | date:'yyyy-MM-dd'}}
+            </ion-item>
+        </ion-list>
+    </ion-content>
+    
+</ion-modal-view>

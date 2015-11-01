@@ -1,0 +1,34 @@
+<ion-modal-view>
+    
+    <ion-header-bar>
+        <h1 class="title">Wybierz tag</h1>
+        <div class="buttons">
+            <button class="button button-clear" ng-click="closeItemTagsDialog()">Powrót</button>
+        </div>
+    </ion-header-bar>
+    
+    <ion-content>
+        
+        <div class="row">
+            <div class="col col-80">
+                <div class="list list-inset" style="margin-top: 0px">
+                    <label class="item item-input">
+                        <i class="icon ion-search placeholder-icon"></i>
+                        <input ng-model="tags.search.name"  type="text" placeholder="Search">
+                    </label>
+                    
+                </div>
+            </div>
+            <div class="col col-bottom">
+                <button ng-click="addNewTag()" class="button button-positive"><i class="icon ion-android-add"></i></button>
+            </div>
+        </div>
+        
+        
+        <ion-list>
+            <ion-checkbox ng-click="tagSelected(tag)" ng-model="tag.checked" ng-checked="tag.checked" ng-repeat="tag in tags.list | filter:tags.search">{{tag.name}}</ion-checkbox>
+        </ion-list>
+        
+    </ion-content>
+    
+</ion-modal-view>

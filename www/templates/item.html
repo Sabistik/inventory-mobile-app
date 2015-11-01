@@ -1,0 +1,34 @@
+<ion-view view-title="Item">
+
+    <ion-content>
+        
+        <h2 style="text-align: center; padding: 5px">{{data.item.product.name}}</h2>
+        
+
+        <div class="list">
+            
+            <div class="item item-toggle">
+                Opakowanie otwarte
+                <label class="toggle toggle-balanced">
+                    <input type="checkbox" ng-model="data.item.opened">
+                    <div class="track">
+                        <div class="handle"></div>
+                    </div>
+                </label>
+            </div>
+            
+            <label class="item item-input item-floating-label">
+                <span class="input-label">Data przydatności</span>
+                <input ng-click="changeExpDate()" ng-model="data.item.expiration_date" type="text" placeholder="Data przydatności">
+            </label>
+            
+            <label class="item item-input item-floating-label">
+                <span class="input-label">Notatka</span>
+                <textarea ng-model="data.item.note" ng-model-options="{debounce:{default:1000}}" placeholder="Notatka"></textarea>
+            </label>
+            
+        </div>
+    
+    </ion-content>
+  
+</ion-view>

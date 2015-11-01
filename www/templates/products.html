@@ -1,0 +1,32 @@
+<ion-view view-title="Produkty">
+  <ion-content>
+    
+      
+      <div class="row">
+            <div class="col col-80">
+                <div class="list list-inset" style="margin-top: 0px">
+                    <label class="item item-input">
+                        <i class="icon ion-search placeholder-icon"></i>
+                        <input ng-model="search.name"  type="text" placeholder="Szukaj">
+                    </label>
+                    
+                </div>
+            </div>
+            <div class="col col-bottom">
+                <button ng-click="barcodeSearch()" class="button button-positive"><i class="icon ion-ios-barcode-outline"></i></button>
+            </div>
+        </div>
+        
+        
+        <ion-list can-swipe="true">
+            <ion-item ui-sref="app.product({barcode: item.barcode_number})" ng-repeat="item in vm.products | filter:search">
+                {{item.name}}
+                <span class="item-note">{{item.items.length}}</span>
+                
+                <ion-option-button class="button-assertive" ng-click="vm.products.splice($index, 1)">Usuń</ion-option-button>
+            </ion-item>
+        </ion-list>
+      
+      
+  </ion-content>
+</ion-view>

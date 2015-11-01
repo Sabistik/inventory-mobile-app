@@ -1,0 +1,51 @@
+<ion-view view-title="Dashboard">
+    <ion-content padding="true">
+        <button class="button button-block button-positive" ng-click="addProduct()"><i class="icon ion-android-add"></i> Dodaj produkt</button>
+        <button class="button button-block button-assertive" ng-click="removeProduct()"><i class="icon ion-ios-trash-outline"></i> Usuń produkt</button>
+    
+    {{response}}
+    
+    <div class="row" style="height: 40px">
+        <div class="col" style="text-align: center">
+            <h2>Ostatnio dodane</h2>
+        </div>
+    </div>
+        
+    <div ng-show="!lastAddedItems.length" class="row">
+        <div class="col" style="text-align: center">
+            <ion-spinner></ion-spinner>
+        </div>
+    </div>
+        
+    
+        <div class="list card" ng-repeat="item in lastAddedItems">
+
+            <div class="item item-body">
+                <h2 style="margin-top: 0px; font-size: 20px">{{item.product.name}}</h2>
+                <p>Barcode: {{item.product.barcode_number}}<br />
+                Data przydatności: {{item.expiration_date | date:'yyyy-MM-dd'}}<br />
+                Tags: <span ng-repeat="tag in item.product.tags">{{tag.name}}{{$last ? '' : ', '}}</span>
+                </p>
+            </div>
+
+            <div class="item tabs tabs-secondary tabs-icon-left">
+                <a class="tab-item" ui-sref="app.item({id: item.id})">
+                    <i class="icon ion-edit"></i>
+                    Edytuj
+                </a>
+                <a class="tab-item" ng-click="showItemTagsDialog(item)" href="#">
+                    <i class="icon ion-pricetag"></i>
+                    Tagi
+                </a>
+                <a class="tab-item" ng-click="itemDeleteConfirm(item)" href="#">
+                    <i class="icon ion-ios-trash-outline"></i>
+                    Usuń
+                </a>
+            </div>
+            
+        </div>
+    
+    
+    </ion-content>
+  
+</ion-view>
