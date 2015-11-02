@@ -41,7 +41,7 @@ angular.module('inventory.controllers', [])
             };
         })
 
-        .controller('DashboardCtrl', function ($scope, Item, $ionicPlatform, $cordovaBarcodeScanner, $cordovaDatePicker, $http, $ionicPopup, $ionicLoading, $ionicModal) {
+        .controller('DashboardCtrl', function ($scope, $q, Item, Product, $ionicPlatform, $cordovaBarcodeScanner, $cordovaDatePicker, $http, $ionicPopup, $ionicLoading, $ionicModal) {
 
             $scope.itemData = {barcodeNumber: null, date: null, name: null};
             $scope.lastAddedItems = [];
@@ -70,139 +70,81 @@ angular.module('inventory.controllers', [])
                     $cordovaBarcodeScanner.scan().then(function (barcodeData) {
 
                         if (barcodeData.cancelled === false) {
-
-                            /*
-                             * @TODO przenieść wyżej, ustawiać date na oststnio wybraną
-                             */
-                            var datePickerOptions = {
-                                date: new Date(),
-                                mode: 'date', // or 'time'
-                                minDate: new Date() - 10000,
-                                allowOldDates: false,
-                                allowFutureDates: true,
-                                doneButtonLabel: 'USTAW',
-                                doneButtonColor: '#F2F3F4',
-                                cancelButtonLabel: 'ANULUJ',
-                                cancelButtonColor: '#000000'
-                            };
-
-                            $cordovaDatePicker.show(datePickerOptions).then(function (date) {
-
-                                var year = date.getFullYear();
-                                var month = date.getMonth() + 1;
-                                var day = date.getDate();
-
-                                $scope.itemData.date = year + '-' + month + '-' + day;
-                                $scope.itemData.barcodeNumber = barcodeData.text;
-
-                                /*
-                                 * @TODO przeniesc wszystkie $ionicLoading zeby sie z automatu pokazywalo dla $http
-                                 */
-                                $ionicLoading.show({
-                                    template: 'Dodawanie produktu...'
-                                });
-
-                                $http.get('http://inventory.sokar.pl/api/product/' + barcodeData.text).then(
-                                        function (response) {
-                                            $ionicLoading.hide();
-                                            if (response.status == 200) {
-
-                                                $http.post('http://inventory.sokar.pl/api/item', $scope.itemData).then(
-                                                        function (response) {
-                                                            $ionicLoading.hide();
-
+                            return barcodeData.text;
+                        }
+                        
+                        return $q.reject();
+                        
+                    }).then(function(barcode) {
+                        
+                        $scope.itemData.barcodeNumber = barcode;
+                        
+                        /*
+                         * @TODO przenieść wyżej, ustawiać date na oststnio wybraną
+                         */
+                        var datePickerOptions = {
+                            date: new Date(),
+                            mode: 'date', // or 'time'
+                            minDate: new Date() - 10000,
+                            allowOldDates: false,
+                            allowFutureDates: true,
+                            doneButtonLabel: 'USTAW',
+                            doneButtonColor: '#F2F3F4',
+                            cancelButtonLabel: 'ANULUJ',
+                            cancelButtonColor: '#000000'
+                        };
+                        
+                        return $cordovaDatePicker.show(datePickerOptions);
+                    }).then(function(date) {
+                        var year = date.getFullYear();
+                        var month = date.getMonth() + 1;
+                        var day = date.getDate();
+                        
+                        $scope.itemData.date = year + '-' + month + '-' + day;
+                        
+                        return Product.getByBarcode($scope.itemData.barcodeNumber);
+                    }).then(
+                        function(data) {
+                            Item.create($scope.itemData).then(function(){
+                                refreshLastAddedItemsList();
+                            });
+                        }, 
+                        function(status) {
+                            if(status == 404) {
+                                $ionicPopup.show({
+                                    template: '<input type="text" ng-model="itemData.name">',
+                                    title: 'Podaj nazwę produktu',
+                                    subTitle: 'Produkt nie znaleziony w bazie',
+                                    scope: $scope,
+                                    buttons: [
+                                        {text: 'Anuluj'},
+                                        {
+                                            text: '<b>Zapisz</b>',
+                                            type: 'button-positive',
+                                            onTap: function (e) {
+                                                if (!$scope.itemData.name) {
+                                                    e.preventDefault();
+                                                } else {
+                                                    
+                                                    Item.create($scope.itemData).then(
+                                                        function() {
                                                             refreshLastAddedItemsList();
-
-                                                            /*$ionicPopup.alert({
-                                                             title: 'Informacja',
-                                                             template: 'Produkt dodany prawidłowo'
-                                                             });*/
-                                                        }, function (error) {
-                                                    $ionicLoading.hide();
-                                                    $ionicPopup.alert({
-                                                        title: 'Błąd!',
-                                                        template: 'Produkt nie został dodany!'
-                                                    });
-                                                });
-
-                                            }
-
-                                        },
-                                        function (response) {
-                                            $ionicLoading.hide();
-                                            if (response.status == 404) {
-                                                $ionicPopup.show({
-                                                    template: '<input type="text" ng-model="itemData.name">',
-                                                    title: 'Podaj nazwę produktu',
-                                                    subTitle: 'Produkt nie znaleziony w bazie',
-                                                    scope: $scope,
-                                                    buttons: [
-                                                        {text: 'Anuluj'},
-                                                        {
-                                                            text: '<b>Zapisz</b>',
-                                                            type: 'button-positive',
-                                                            onTap: function (e) {
-                                                                if (!$scope.itemData.name) {
-                                                                    e.preventDefault();
-                                                                } else {
-                                                                    $ionicLoading.show({
-                                                                        template: 'Dodawanie produktu...'
-                                                                    });
-
-                                                                    $http.post('http://inventory.sokar.pl/api/item', $scope.itemData).then(
-                                                                            function (response) {
-                                                                                $ionicLoading.hide();
-
-                                                                                refreshLastAddedItemsList();
-
-                                                                                $scope.itemData.name = null;
-
-                                                                                /*$ionicPopup.alert({
-                                                                                 title: 'Informacja',
-                                                                                 template: 'Produkt dodany prawidłowo'
-                                                                                 });*/
-                                                                            },
-                                                                            function (error) {
-                                                                                $ionicLoading.hide();
-                                                                                $ionicPopup.alert({
-                                                                                    title: 'Błąd!',
-                                                                                    template: 'Produkt nie został dodany!'
-                                                                                });
-                                                                            });
-                                                                }
-                                                            }
                                                         }
-                                                    ]
-                                                });
-                                            } else {
-                                                $ionicPopup.alert({
-                                                    title: 'Błąd!',
-                                                    template: 'Nie można pobrać produktu!'
-                                                });
+                                                    );
+                                                    
+                                                }
                                             }
                                         }
-                                );
-
-
-
-                            },
-                                    function () {
-                                        $ionicPopup.alert({
-                                            title: 'Błąd!',
-                                            template: 'Nie można uruchomić datapickera!'
-                                        });
-                                    });
-
-                        }
-                    },
-                            function () {
-                                $ionicPopup.alert({
-                                    title: 'Błąd!',
-                                    template: 'Nie można uruchomić czytnika kodów!'
+                                    ]
                                 });
-
-                            });
+                            }
+                        }
+                    );
                 };
+
+                            
+
+
 
                 $ionicModal.fromTemplateUrl('templates/itemsToDelete.html', {
                     scope: $scope,

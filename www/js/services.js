@@ -121,6 +121,21 @@ angular.module('inventory.services').factory('Item', function($http, $q, $ionicP
                     return $q.reject(response.status);
                 }
             );
+        },
+        create: function(data) {
+            $ionicLoading.show({template: 'Tworzenie...'});
+            return $http.post(getApiUrl(), data).then(
+                function(response) {
+                    $ionicLoading.hide();
+                    return response.data;
+                },
+                function(response) {
+                    $ionicLoading.hide();
+                    showErrorInfo();
+                    
+                    return $q.reject(response.status);
+                }
+            );
         }
     };
 });
